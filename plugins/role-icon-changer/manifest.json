@@ -1,0 +1,13 @@
+{
+    "name": "Custom User Icons",
+    "description": "Custom role icons for specific users in Vendetta/Revenge.",
+    "authors": [
+        {
+            "name": "Sperhak",
+            "id": "918273745"
+        }
+    ],
+    "main": "index.js",
+    "settings": "Settings.jsx", // <--- TOTO JE NOVÉ
+    "hash": "av1"
+}
