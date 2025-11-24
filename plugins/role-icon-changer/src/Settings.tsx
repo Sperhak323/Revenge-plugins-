@@ -1,8 +1,10 @@
+// Súbor: plugins/role-icon-changer/Settings.tsx
+
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import { React } from "@vendetta/metro/common";
+import React, { useState } from "@vendetta/metro/common/react"; // <--- OPRAVA IMPORTU
 
-// Importy pre komponenty UI (FormRow, FormTextArea)
+// Používame destructuring pre komponenty UI 
 const { FormText, FormRow, FormTextArea } = Forms;
 
 // Príklad, ako by mala mapa vyzerať
@@ -14,8 +16,8 @@ export default () => {
         storage.iconMapJson = "{}";
     }
     
-    // Používame state pre zobrazenie aktuálnej hodnoty v textarea
-    const [jsonInput, setJsonInput] = React.useState(storage.iconMapJson);
+    // Používame React hook useState (OPRAVA: už nie je potrebné písať React.useState)
+    const [jsonInput, setJsonInput] = useState(storage.iconMapJson);
     
     return (
         <FormText>
@@ -34,5 +36,6 @@ export default () => {
             />
         </FormText>
     );
+};
 };
           
