@@ -1,15 +1,11 @@
 // Súbor: plugins/role-icon-changer/index.ts
 
-// 1. DÔLEŽITÉ: Importujeme komponent nastavení
 import Settings from "./Settings"; 
-
-// 2. KĽÚČOVÉ: Exportujeme ju pre Vendettu/Rollup
-export const settings = Settings; // <--- TENTO RIADOK CHÝBAL!
-
-// Zvyšné importy pluginu
 import { storage } from "@vendetta/plugin";
 import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
+// DÔLEŽITÉ: Musíme importovať React, inak React.createElement nebude fungovať
+import React from "react"; 
 
 const logger = findByProps("logger").logger;
 const { Image } = findByProps("Image");
@@ -17,17 +13,20 @@ const MessageHeader = findByProps("MessageHeader") || findByProps("MessageTimest
 
 let patch;
 
-// Funkcia na bezpečné parsovanie JSON nastavení
 function getIconMap() {
     try {
         return JSON.parse(storage.iconMapJson || "{}");
     } catch {
-        logger.error("CustomIcons: Chyba pri parsovaní nastavení JSON.");
+        // Tichý pád alebo logovanie, ak je JSON zlý
         return {};
     }
 }
 
+// Všetko musí byť v tomto jednom objekte!
 export default {
+    // 1. OPRAVA: Settings musí byť TU, vnútri objektu
+    settings: Settings,
+    
     onLoad: () => {
         if (!MessageHeader || !Image) {
             logger.error("CustomIcons: Required components not found!");
@@ -39,13 +38,13 @@ export default {
             const authorId = args?.message?.author?.id;
 
             if (authorId && iconMap[authorId]) {
+                // Tu sa používal React, ale nebol importovaný
                 const iconElement = React.createElement(Image, {
                     source: { uri: iconMap[authorId] },
                     style: { width: 16, height: 16, marginLeft: 4, marginTop: 2, resizeMode: "contain", borderRadius: 0 },
                 });
 
                 try {
-                    // Logika vkladania ikony (podobná tvojmu pôvodnému kódu)
                     const children = res?.props?.children;
                     if (Array.isArray(children)) {
                         children.push(iconElement);
@@ -53,17 +52,16 @@ export default {
                         res.props.children = [children, iconElement];
                     }
                 } catch (e) {
-                    logger.error("Chyba pri vkladaní ikony:", e);
+                    // Ignorujeme chyby pri renderi, aby nepadol Discord
                 }
             }
             return res;
         });
     },
+    
     onUnload: () => {
         if (patch) {
             patch();
         }
     }
 };
-
-    
