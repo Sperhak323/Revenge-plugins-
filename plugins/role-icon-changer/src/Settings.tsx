@@ -1,17 +1,17 @@
 import { storage } from "@vendetta/plugin";
 import { findByProps } from "@vendetta/metro";
-import { Forms } from "@vendetta/ui/components"; // Importujeme Forms
-import React, { useState } from "react"; // Dôležitý React import
-import { View } from "react-native"; // Pre bezpečný obal
+import { Forms } from "@vendetta/ui/components";
+import { ReactNative } from "@vendetta/metro/common"; 
+// === KRITICKÁ ZMENA TU ===
+// Namiesto importu z "react" ich získame priamo z knižnice Discordu:
+const { React } = findByProps("createElement", "useState"); 
+const { useState } = React;
+// =========================
 
-// === BEZPEČNÉ ZÍSKANIE KOMPONENTOV ===
-// Získame FormRow a FormSection priamo z Vendetta Forms
+// Ostatné importy UI
+const { View, Text } = ReactNative; 
 const { FormSection, FormRow } = Forms;
-
-// Použijeme FormInput namiesto FormText/Area pre jednoduché vkladanie
-// POZNÁMKA: FormInput nemusí byť v Forms, ale je to najbezpečnejšia voľba!
-// Ak by FormInput nefungoval, nahradíme ho React Native TextInput
-const FormInput = findByProps("TextInput").TextInput;
+const FormInput = findByProps("TextInput").TextInput; // Zabezpečený FormInput
 
 // Inicializácia pre nové polia, ak neexistujú
 if (!storage.targetId) storage.targetId = "";
@@ -19,6 +19,8 @@ if (!storage.targetUrl) storage.targetUrl = "";
 
 
 export default () => {
+    // Kód nastavení sa môže spustiť až odtiaľto:
+    
     // Používame useState na sledovanie zmien
     const [idInput, setIdInput] = useState(storage.targetId);
     const [urlInput, setUrlInput] = useState(storage.targetUrl);
@@ -28,6 +30,7 @@ export default () => {
         return <View><Text>Chyba: Chýbajú UI komponenty!</Text></View>;
     }
 
+    // ... zvyšok kódu FormRow a FormInput
     return (
         <FormSection title="Nastavenie ikony pre jedného užívateľa">
             
@@ -39,7 +42,7 @@ export default () => {
                 <FormInput
                     placeholder="1106246400158728242"
                     value={idInput}
-                    onChangeText={(newValue) => { // Zmena z onChange na onChangeText
+                    onChangeText={(newValue) => {
                         setIdInput(newValue);
                         storage.targetId = newValue; 
                     }}
@@ -54,7 +57,7 @@ export default () => {
                 <FormInput
                     placeholder="https://i.postimg.cc/..."
                     value={urlInput}
-                    onChangeText={(newValue) => { // Zmena z onChange na onChangeText
+                    onChangeText={(newValue) => {
                         setUrlInput(newValue);
                         storage.targetUrl = newValue; 
                     }}
