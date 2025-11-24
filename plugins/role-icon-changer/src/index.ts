@@ -2,6 +2,8 @@ import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
 import { React } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin"; // <--- NOVÝ IMPORT
+import { logger } from "@vendetta";
+import Settings from "./Settings";
 
 // Funkcia na bezpečné načítanie mapy z úložiska (zabraňuje pádu pri neplatnom JSON)
 const getUserIconMap = () => {
