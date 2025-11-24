@@ -8,6 +8,7 @@
         }
     ],
     "main": "src/index.ts",
-    "settings": "src/Settings.tsx",
-    "hash": "av1"
+    "vendetta": {
+        "icon": "ic_badge_staff"
+    }
 }
