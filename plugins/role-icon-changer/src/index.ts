@@ -1,74 +1,69 @@
+// Súbor: plugins/role-icon-changer/index.ts
+
+// 1. DÔLEŽITÉ: Importujeme komponent nastavení
+import Settings from "./Settings"; 
+
+// 2. KĽÚČOVÉ: Exportujeme ju pre Vendettu/Rollup
+export const settings = Settings; // <--- TENTO RIADOK CHÝBAL!
+
+// Zvyšné importy pluginu
+import { storage } from "@vendetta/plugin";
 import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
-import { React } from "@vendetta/metro/common";
-import { storage } from "@vendetta/plugin"; // <--- NOVÝ IMPORT
-import { logger } from "@vendetta";
-import Settings from "./Settings";
 
-// Funkcia na bezpečné načítanie mapy z úložiska (zabraňuje pádu pri neplatnom JSON)
-const getUserIconMap = () => {
+const logger = findByProps("logger").logger;
+const { Image } = findByProps("Image");
+const MessageHeader = findByProps("MessageHeader") || findByProps("MessageTimestamp");
+
+let patch;
+
+// Funkcia na bezpečné parsovanie JSON nastavení
+function getIconMap() {
     try {
-        // storage.iconMapJson je JSON string z nastavení
-        return JSON.parse(storage.iconMapJson || '{}');
+        return JSON.parse(storage.iconMapJson || "{}");
     } catch {
-        console.error("CustomIcons: Chyba pri parsovaní nastavení JSON.");
-        return {}; 
+        logger.error("CustomIcons: Chyba pri parsovaní nastavení JSON.");
+        return {};
     }
-};
-
-// Hľadáme hlavný komponent pre hlavičku správy
-const MessageHeader = findByProps("MessageHeader") || findByProps("MessageTimestamp"); 
-const { Image } = findByProps("Image"); 
-
-let unpatch;
+}
 
 export default {
     onLoad: () => {
         if (!MessageHeader || !Image) {
-            console.error("CustomIcons: Required components not found!");
+            logger.error("CustomIcons: Required components not found!");
             return;
         }
 
-        unpatch = after("default", MessageHeader, ([props], result) => {
-            
-            // Načítame aktuálne nastavenia z úložiska pri každom renderovaní
-            const userIconMap = getUserIconMap(); 
-            
-            const message = props?.message;
-            const userId = message?.author?.id;
+        patch = after("default", MessageHeader, ([args], res) => {
+            const iconMap = getIconMap();
+            const authorId = args?.message?.author?.id;
 
-            // Ak ID existuje v mape nastavení
-            if (userId && userIconMap[userId]) {
-                
-                const customIcon = React.createElement(Image, {
-                    source: { uri: userIconMap[userId] },
-                    style: {
-                        width: 16,
-                        height: 16,
-                        marginLeft: 4,
-                        marginTop: 2,
-                        resizeMode: 'contain',
-                        borderRadius: 0 
-                    }
+            if (authorId && iconMap[authorId]) {
+                const iconElement = React.createElement(Image, {
+                    source: { uri: iconMap[authorId] },
+                    style: { width: 16, height: 16, marginLeft: 4, marginTop: 2, resizeMode: "contain", borderRadius: 0 },
                 });
 
-                // Vložíme ikonku do React stromu
                 try {
-                    // ... (logika vkladania zostáva rovnaká)
-                    if (Array.isArray(result?.props?.children)) {
-                        result.props.children.push(customIcon);
-                    } else if (result?.props?.children) {
-                        result.props.children = [result.props.children, customIcon];
+                    // Logika vkladania ikony (podobná tvojmu pôvodnému kódu)
+                    const children = res?.props?.children;
+                    if (Array.isArray(children)) {
+                        children.push(iconElement);
+                    } else if (children) {
+                        res.props.children = [children, iconElement];
                     }
                 } catch (e) {
-                    console.error("Chyba pri vkladaní ikony:", e);
+                    logger.error("Chyba pri vkladaní ikony:", e);
                 }
             }
-            return result;
+            return res;
         });
     },
-
     onUnload: () => {
-        if (unpatch) unpatch();
+        if (patch) {
+            patch();
+        }
     }
 };
+
+    
