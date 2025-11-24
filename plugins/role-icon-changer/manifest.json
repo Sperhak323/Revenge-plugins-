@@ -8,6 +8,6 @@
         }
     ],
     "main": "index.js",
-    "settings": "Settings.jsx", // <--- TOTO JE NOVÉ
+    "settings": "Settings.jsx",
     "hash": "av1"
 }
