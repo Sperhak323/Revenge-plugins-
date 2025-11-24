@@ -1,8 +1,17 @@
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import React from "react"; // Váš funkčný import Reactu
+import { findByProps } from "@vendetta/metro";
 
-// Používame Váš funkčný destructuring, len pridáme FormRow
+// Váš pôvodný import (ktorý je zrejme len pre JSX)
+import React from "react"; 
+
+// === KRITICKÁ ÚPRAVA ===
+// Použijeme findByProps na získanie Reactu S HOOKMI (vyriešenie chyby useState of null)
+const InternalReact = findByProps("createElement", "useState");
+const { useState } = InternalReact; 
+// ======================
+
+// Používame Váš funkčný destructuring
 const { FormSection, FormRow, FormInput } = Forms || {};
 
 // Inicializácia pre nové polia, ktoré budeme používať
@@ -11,11 +20,10 @@ if (!storage.targetUrl) storage.targetUrl = "";
 
 
 export default () => {
-    // Používame useState, pretože React import funguje
-    const [idInput, setIdInput] = React.useState(storage.targetId);
-    const [urlInput, setUrlInput] = React.useState(storage.targetUrl);
+    // Odteraz používame HOOKS z InternalReact, nie z pôvodného 'React'
+    const [idInput, setIdInput] = useState(storage.targetId);
+    const [urlInput, setUrlInput] = useState(storage.targetUrl);
 
-    // Ak sa komponenty nenačítali, vrátime jednoduchý text
     if (!FormSection || !FormInput || !FormRow) {
         return <Forms.FormText>Chyba: Chýbajú UI komponenty!</Forms.FormText>;
     }
@@ -31,7 +39,6 @@ export default () => {
                 <FormInput
                     placeholder="1106246400158728242"
                     value={idInput}
-                    // Používame Váš pôvodný 'onChange'
                     onChange={(newValue) => {
                         setIdInput(newValue);
                         storage.targetId = newValue; // Uloženie ID
