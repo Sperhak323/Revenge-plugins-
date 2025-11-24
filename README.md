@@ -2,7 +2,7 @@ https://sperhak323.github.io/Revenge-plugins-/ Vendetta Plugins Template
 This repo contains a template for creating [Vendetta](https://github.com/vendetta-mod/Vendetta) plugins.
 
 
-https://sperhak323.github.io/Revenge-plugins-/custom-role-icon
+https://sperhak323.github.io/Revenge-plugins-/role-icon-changer
 # How to install?
 Paste a plugin URL into the Plugins page of Vendetta, following a basic format of:
 
