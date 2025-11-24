@@ -1,66 +1,69 @@
 import { storage } from "@vendetta/plugin";
-import { findByProps } from "@vendetta/metro";
 import { Forms } from "@vendetta/ui/components";
-import { ReactNative } from "@vendetta/metro/common"; 
-// === KRITICKÁ ZMENA TU ===
-// Namiesto importu z "react" ich získame priamo z knižnice Discordu:
+import { findByProps } from "@vendetta/metro";
+
+// === KRITICKÁ FIXA PRE REACT HOOKY (oprava chyby useState of null) ===
 const { React } = findByProps("createElement", "useState"); 
 const { useState } = React;
-// =========================
+// =======================================================================
 
-// Ostatné importy UI
-const { View, Text } = ReactNative; 
-const { FormSection, FormRow } = Forms;
-const FormInput = findByProps("TextInput").TextInput; // Zabezpečený FormInput
+// Získanie základných UI komponentov
+const { FormSection, FormRow } = Forms || {};
+// Získanie základného TextInput pre vstup
+const TextInput = findByProps("TextInput").TextInput;
 
-// Inicializácia pre nové polia, ak neexistujú
+// Inicializácia úložiska (musí byť mimo komponentu)
 if (!storage.targetId) storage.targetId = "";
 if (!storage.targetUrl) storage.targetUrl = "";
 
 
 export default () => {
-    // Kód nastavení sa môže spustiť až odtiaľto:
-    
-    // Používame useState na sledovanie zmien
+    // Používame hooky odteraz, lebo React už je načítaný
     const [idInput, setIdInput] = useState(storage.targetId);
     const [urlInput, setUrlInput] = useState(storage.targetUrl);
-    
-    // Zabezpečíme, že existujú Form komponenty pred renderom
-    if (!FormSection || !FormRow || !FormInput) {
-        return <View><Text>Chyba: Chýbajú UI komponenty!</Text></View>;
-    }
 
-    // ... zvyšok kódu FormRow a FormInput
+    // Kontrola, či sa načítali základné komponenty, inak to padne
+    if (!FormSection || !FormRow || !TextInput) {
+        return (
+            <FormSection title="CHYBA">
+                <FormRow label="Plugin UI Error" sublabel="Chýbajú základné komponenty Discord UI." />
+            </FormSection>
+        );
+    }
+    
     return (
-        <FormSection title="Nastavenie ikony pre jedného užívateľa">
+        <FormSection title="Nastavenia Ikony (ID a URL)">
             
-            {/* Pole pre ID */}
+            {/* 1. Pole pre ID */}
             <FormRow 
                 label="ID Používateľa"
-                sublabel="Vložte presné 18-miestne ID."
+                sublabel="Vložte 18-miestne Discord ID."
             >
-                <FormInput
+                {/* Používame najbezpečnejší TextInput */}
+                <TextInput
                     placeholder="1106246400158728242"
                     value={idInput}
                     onChangeText={(newValue) => {
                         setIdInput(newValue);
-                        storage.targetId = newValue; 
+                        storage.targetId = newValue; // Uloženie ID
                     }}
+                    style={{ color: "#fff" }} // Pre tmavý režim
                 />
             </FormRow>
             
-            {/* Pole pre URL */}
+            {/* 2. Pole pre URL */}
             <FormRow 
-                label="URL Adresa Ikony"
-                sublabel="Odkaz (URL) na obrázok (napr. .png)."
+                label="URL Ikony"
+                sublabel="Odkaz na obrázok (.png, .jpg)."
             >
-                <FormInput
+                <TextInput
                     placeholder="https://i.postimg.cc/..."
                     value={urlInput}
                     onChangeText={(newValue) => {
                         setUrlInput(newValue);
-                        storage.targetUrl = newValue; 
+                        storage.targetUrl = newValue; // Uloženie URL
                     }}
+                    style={{ color: "#fff" }} // Pre tmavý režim
                 />
             </FormRow>
         </FormSection>
