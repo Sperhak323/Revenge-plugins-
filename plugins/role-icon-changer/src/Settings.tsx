@@ -1,8 +1,9 @@
-// Súbor: plugins/role-icon-changer/Settings.tsx
+// Súbor: plugins/role-icon-changer/src/Settings.tsx
 
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import React, { useState } from "react"; 
+import React, { useState } from "react"; // <--- OPRAVA: Stabilný React import
+
 // Používame destructuring pre komponenty UI 
 const { FormText, FormRow, FormTextArea } = Forms;
 
@@ -15,7 +16,7 @@ export default () => {
         storage.iconMapJson = "{}";
     }
     
-    // Používame React hook useState (OPRAVA: už nie je potrebné písať React.useState)
+    // Používame React hook useState
     const [jsonInput, setJsonInput] = useState(storage.iconMapJson);
     
     return (
@@ -36,5 +37,4 @@ export default () => {
         </FormText>
     );
 };
-};
-          
+    
