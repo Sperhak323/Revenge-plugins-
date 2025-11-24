@@ -1,1 +1,1 @@
-{"name":"Custom User Icons","description":"Custom role icons for specific users in Vendetta/Revenge.","authors":[{"name":"Sperhak","id":"918273745"}],"main":"index.js","settings":"src/Settings.tsx","hash":"da1de0be63e341df7ddac50d177313c7bac2ef01a56a3a33e6852cc07c2620d2"}
+{"name":"Custom User Icons","description":"Custom role icons for specific users in Vendetta/Revenge.","authors":[{"name":"Sperhak","id":"918273745"}],"main":"index.js","vendetta":{"icon":"ic_badge_staff"},"hash":"da1de0be63e341df7ddac50d177313c7bac2ef01a56a3a33e6852cc07c2620d2"}
