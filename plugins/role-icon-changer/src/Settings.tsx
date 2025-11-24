@@ -2,8 +2,7 @@
 
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import React, { useState } from "@vendetta/metro/common/react"; // <--- OPRAVA IMPORTU
-
+import React, { useState } from "react"; 
 // Používame destructuring pre komponenty UI 
 const { FormText, FormRow, FormTextArea } = Forms;
 
