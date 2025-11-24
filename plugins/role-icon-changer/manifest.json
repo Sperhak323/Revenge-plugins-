@@ -7,7 +7,7 @@
             "id": "918273745"
         }
     ],
-    "main": "index.js",
-    "settings": "Settings.jsx",
+    "main": "src/index.ts",
+    "settings": "src/Settings.tsx",
     "hash": "av1"
 }
