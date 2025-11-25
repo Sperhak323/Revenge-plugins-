@@ -26,7 +26,7 @@ export default () => {
 
             {/* 1. Pole pre ID (Priamo FormInput pod FormText) */}
             <FormInput
-                placeholder="1106246400158728242"
+                placeholder="192927727282922"
                 value={idInput}
                 onChange={(newValue) => {
                     setIdInput(newValue);
