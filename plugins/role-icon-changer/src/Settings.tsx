@@ -20,7 +20,7 @@ export default () => {
             
             <FormText>ID Používateľa (18 cifier):</FormText>
             <FormInput
-                placeholder="1106246400158728242"
+                placeholder="1235670998776555"
                 // Čítame priamo zo storage, čo robí Váš funkčný kód
                 value={storage.targetId} 
                 onChange={(newValue) => {
