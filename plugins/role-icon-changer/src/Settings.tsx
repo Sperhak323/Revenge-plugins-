@@ -1,65 +1,52 @@
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import { findByProps } from "@vendetta/metro";
-
-// Váš pôvodný import (ktorý je zrejme len pre JSX)
 import React from "react"; 
 
-// === KRITICKÁ ÚPRAVA ===
-// Použijeme findByProps na získanie Reactu S HOOKMI (vyriešenie chyby useState of null)
-const InternalReact = findByProps("createElement", "useState");
-const { useState } = InternalReact; 
-// ======================
-
 // Používame Váš funkčný destructuring
-const { FormSection, FormRow, FormInput } = Forms || {};
+const { FormSection, FormInput, FormText } = Forms || {};
 
-// Inicializácia pre nové polia, ktoré budeme používať
+// Inicializácia pre nové polia (targetId a targetUrl)
 if (!storage.targetId) storage.targetId = "";
 if (!storage.targetUrl) storage.targetUrl = "";
 
 
 export default () => {
-    // Odteraz používame HOOKS z InternalReact, nie z pôvodného 'React'
-    const [idInput, setIdInput] = useState(storage.targetId);
-    const [urlInput, setUrlInput] = useState(storage.targetUrl);
+    const [idInput, setIdInput] = React.useState(storage.targetId);
+    const [urlInput, setUrlInput] = React.useState(storage.targetUrl);
 
-    if (!FormSection || !FormInput || !FormRow) {
+    if (!FormSection || !FormInput || !FormText) {
         return <Forms.FormText>Chyba: Chýbajú UI komponenty!</Forms.FormText>;
     }
     
     return (
         <FormSection title="Nastavenia Ikony (ID a URL)">
             
-            {/* Pole 1: ID */}
-            <FormRow 
-                label="ID Používateľa"
-                sublabel="Vložte 18-miestne Discord ID."
-            >
-                <FormInput
-                    placeholder="1106246400158728242"
-                    value={idInput}
-                    onChange={(newValue) => {
-                        setIdInput(newValue);
-                        storage.targetId = newValue; // Uloženie ID
-                    }}
-                />
-            </FormRow>
+            {/* Popis pre prvé pole */}
+            <FormText>ID Používateľa (18 cifier):</FormText>
+
+            {/* 1. Pole pre ID (Priamo FormInput pod FormText) */}
+            <FormInput
+                placeholder="1106246400158728242"
+                value={idInput}
+                onChange={(newValue) => {
+                    setIdInput(newValue);
+                    storage.targetId = newValue; 
+                }}
+            />
             
-            {/* Pole 2: URL */}
-            <FormRow 
-                label="URL Ikony"
-                sublabel="Odkaz na obrázok (.png, .jpg)."
-            >
-                <FormInput
-                    placeholder="https://i.postimg.cc/..."
-                    value={urlInput}
-                    onChange={(newValue) => {
-                        setUrlInput(newValue);
-                        storage.targetUrl = newValue;
-                    }}
-                />
-            </FormRow>
+            {/* Popis pre druhé pole */}
+            <FormText>URL Ikony (.png, .jpg):</FormText>
+
+            {/* 2. Pole pre URL */}
+            <FormInput
+                placeholder="https://i.postimg.cc/..."
+                value={urlInput}
+                onChange={(newValue) => {
+                    setUrlInput(newValue);
+                    storage.targetUrl = newValue;
+                }}
+            />
         </FormSection>
     );
 };
+                
