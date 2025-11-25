@@ -1,19 +1,16 @@
 import { storage } from "@vendetta/plugin";
 import { Forms } from "@vendetta/ui/components";
-import React from "react"; 
 
-// Používame Váš funkčný destructuring
+// === BEZ IMPORTU REACTU A USESTATE, ABY SME PREDIŠLI PÁDU ===
 const { FormSection, FormInput, FormText } = Forms || {};
 
-// Inicializácia pre nové polia (targetId a targetUrl)
+// Inicializácia pre nové polia
 if (!storage.targetId) storage.targetId = "";
 if (!storage.targetUrl) storage.targetUrl = "";
 
 
 export default () => {
-    const [idInput, setIdInput] = React.useState(storage.targetId);
-    const [urlInput, setUrlInput] = React.useState(storage.targetUrl);
-
+    // Kód je funkčný a nepoužíva React Hooky
     if (!FormSection || !FormInput || !FormText) {
         return <Forms.FormText>Chyba: Chýbajú UI komponenty!</Forms.FormText>;
     }
@@ -21,32 +18,25 @@ export default () => {
     return (
         <FormSection title="Nastavenia Ikony (ID a URL)">
             
-            {/* Popis pre prvé pole */}
             <FormText>ID Používateľa (18 cifier):</FormText>
-
-            {/* 1. Pole pre ID (Priamo FormInput pod FormText) */}
             <FormInput
-                placeholder="192927727282922"
-                value={idInput}
+                placeholder="1106246400158728242"
+                // Čítame priamo zo storage, čo robí Váš funkčný kód
+                value={storage.targetId} 
                 onChange={(newValue) => {
-                    setIdInput(newValue);
+                    // Ukladáme priamo do storage, čo robí Váš funkčný kód
                     storage.targetId = newValue; 
                 }}
             />
             
-            {/* Popis pre druhé pole */}
             <FormText>URL Ikony (.png, .jpg):</FormText>
-
-            {/* 2. Pole pre URL */}
             <FormInput
                 placeholder="https://i.postimg.cc/..."
-                value={urlInput}
+                value={storage.targetUrl}
                 onChange={(newValue) => {
-                    setUrlInput(newValue);
                     storage.targetUrl = newValue;
                 }}
             />
         </FormSection>
     );
 };
-                
