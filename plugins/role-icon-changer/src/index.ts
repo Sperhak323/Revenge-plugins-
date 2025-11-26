@@ -1,13 +1,11 @@
-// Súbor: index.ts
-
 import { storage } from "@vendetta/plugin";
 import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
-// Odstránené importy loggera a ReactNative, ktoré spôsobovali pád
+import Settings from "./Settings"; // <== KĽÚČOVÉ: Import pre nastavenia
 
 let patch;
 
-// Funkcia na získavanie ikony zostáva bezo zmeny
+// FUNKCIA NA ČÍTANIE DÁT Z DVOCH POLÍ
 function getIconMap() {
     if (storage.targetId && storage.targetUrl) {
         return {
@@ -19,26 +17,22 @@ function getIconMap() {
 
 export default {
     onLoad: () => {
-        // === BEZPEČNÉ ZÍSKANIE KOMPONENTOV AŽ V ONLOAD ===
-        
-        // Získanie kľúčových závislostí:
-        const ReactModule = findByProps("createElement", "useState"); // Získanie Reactu
-        const ImageModule = findByProps("Image"); // Získanie komponentu Image
-        const MessageHeaderModule = findByProps("MessageHeader") || findByProps("MessageTimestamp"); // Získanie cieľového komponentu
+        // === BEZPEČNÉ ZÍSKANIE ZÁVISLOSTÍ (Crash-Proof) ===
+        // Získanie všetkých závislostí cez findByProps, aby sa predišlo pádu
+        const ReactModule = findByProps("createElement", "useState");
+        const ImageModule = findByProps("Image"); 
+        const MessageHeaderModule = findByProps("MessageHeader") || findByProps("MessageTimestamp"); 
 
-        // === KRITICKÁ KONTROLA ===
         if (!ReactModule || !ImageModule || !MessageHeaderModule) {
-            // Ak zlyháme tu, kód ďalej nepadne, len sa plugin nenačíta
-            return; 
+             return; // Ak niečo chýba, ticho zlyhá
         }
 
-        // Deklarácia, aby bol kód čistý
         const React = ReactModule;
         const Image = ImageModule.Image;
         const MessageHeader = MessageHeaderModule;
         
-        // ===================================
-        
+        // =================================================
+
         patch = after("default", MessageHeader, ([args], res) => {
             const iconMap = getIconMap();
             const authorId = args?.message?.author?.id; 
@@ -48,23 +42,23 @@ export default {
             const iconUrl = iconMap[authorId];
 
             if (iconUrl) {
-                // Vytvorenie elementu ikony (používame createElement z nájdeného Reactu)
+                // Vytvorenie elementu ikony (cez React.createElement)
                 const iconElement = React.createElement(Image, {
                     source: { uri: iconUrl },
                     style: { width: 16, height: 16, marginRight: 4, borderRadius: 3, top: 2 },
                     resizeMode: "cover",
                 });
 
-                // Logika vkladania
+                // Vkladanie elementu do správy
                 try {
                     const children = res?.props?.children;
-                    if (Array.isArray(children)) {
+                    if (ArrayOf(children)) { // Použijeme všeobecnú ArrayOf, ak sa isArray nenačítalo
                         children.push(iconElement);
                     } else if (children) {
                         res.props.children = [children, iconElement];
                     }
                 } catch (e) {
-                    // Ak sa vkladanie nepodarí, plugin nepadne
+                    // Ignorujeme chybu vkladania
                 }
             }
             return res;
@@ -74,4 +68,8 @@ export default {
     onUnload: () => {
         if (patch) patch();
     },
+
+    // === KĽÚČOVÁ OPRAVA: Obnovenie exportu nastavení ===
+    settings: Settings,
 };
+    
