@@ -3,67 +3,59 @@
 import { storage } from "@vendetta/plugin";
 import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
-import { logger } from "@vendetta/logger"; // <== NOVÝ IMPORT
-import { ReactNative } from "@vendetta/metro/common";
-
-const { React } = ReactNative;
-const { Image } = findByProps("Image");
-
-// === FUNKCIA ZÍSKAVANIA IKONY (Debug) ===
-function getIconMap() {
-    if (storage.targetId && storage.targetUrl) {
-        const map = {
-            [storage.targetId]: storage.targetUrl
-        };
-        // LOG 1: Nastavenia načítané
-        logger.log("CustomIcons: Nastavenia načítané (Mapa ikon):", map);
-        return map;
-    }
-    // LOG 2: Nastavenia prázdne
-    logger.log("CustomIcons: Nastavenia NENACITANE (Chýba ID alebo URL)");
-    return {};
-}
+// Odstránené importy loggera a ReactNative, ktoré spôsobovali pád
 
 let patch;
 
+// Funkcia na získavanie ikony zostáva bezo zmeny
+function getIconMap() {
+    if (storage.targetId && storage.targetUrl) {
+        return {
+            [storage.targetId]: storage.targetUrl
+        };
+    }
+    return {};
+}
+
 export default {
     onLoad: () => {
-        const MessageHeader = findByProps("MessageHeader") || findByProps("MessageTimestamp");
+        // === BEZPEČNÉ ZÍSKANIE KOMPONENTOV AŽ V ONLOAD ===
+        
+        // Získanie kľúčových závislostí:
+        const ReactModule = findByProps("createElement", "useState"); // Získanie Reactu
+        const ImageModule = findByProps("Image"); // Získanie komponentu Image
+        const MessageHeaderModule = findByProps("MessageHeader") || findByProps("MessageTimestamp"); // Získanie cieľového komponentu
 
-        // === KONTROLA KOMPONENTU (Endpointu) ===
-        if (!MessageHeader) {
-            // LOG 3: Kritická chyba
-            logger.error("CustomIcons: Komponent 'MessageHeader' nenájdený! PATCH ZLYHAL.");
-            return;
-        } else {
-            // LOG 4: Komponent nájdený
-            logger.log("CustomIcons: Komponent MessageHeader nájdený. Pokus o PATCH...");
+        // === KRITICKÁ KONTROLA ===
+        if (!ReactModule || !ImageModule || !MessageHeaderModule) {
+            // Ak zlyháme tu, kód ďalej nepadne, len sa plugin nenačíta
+            return; 
         }
 
+        // Deklarácia, aby bol kód čistý
+        const React = ReactModule;
+        const Image = ImageModule.Image;
+        const MessageHeader = MessageHeaderModule;
+        
+        // ===================================
+        
         patch = after("default", MessageHeader, ([args], res) => {
             const iconMap = getIconMap();
             const authorId = args?.message?.author?.id; 
 
-            if (!authorId) return res; // Nie je správa, ignorovať
-
-            // LOG 5: Spracovanie ID
-            // logger.log("CustomIcons: Spracovanie ID:", authorId); // Tieto sú veľmi časté, zatiaľ ich necháme zakomentované
+            if (!authorId) return res;
             
             const iconUrl = iconMap[authorId];
 
             if (iconUrl) {
-                // LOG 6: Nájdená zhoda
-                logger.log("CustomIcons: NÁJDENÁ ZHODA! Vkladanie ikony pre ID:", authorId, " URL:", iconUrl);
-                
-                // ... (Kód pre vloženie ikony je tu) ...
-                
-                // Vytvorenie elementu ikony
+                // Vytvorenie elementu ikony (používame createElement z nájdeného Reactu)
                 const iconElement = React.createElement(Image, {
                     source: { uri: iconUrl },
                     style: { width: 16, height: 16, marginRight: 4, borderRadius: 3, top: 2 },
                     resizeMode: "cover",
                 });
 
+                // Logika vkladania
                 try {
                     const children = res?.props?.children;
                     if (Array.isArray(children)) {
@@ -72,7 +64,7 @@ export default {
                         res.props.children = [children, iconElement];
                     }
                 } catch (e) {
-                    logger.error("CustomIcons: Chyba pri vkladaní React Elementu:", e);
+                    // Ak sa vkladanie nepodarí, plugin nepadne
                 }
             }
             return res;
